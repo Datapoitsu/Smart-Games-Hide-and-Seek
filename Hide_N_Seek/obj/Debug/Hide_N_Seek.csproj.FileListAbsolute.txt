@@ -1,0 +1,7 @@
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.exe.config
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.exe
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.pdb
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.csproj.AssemblyReference.cache
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.csproj.CoreCompileInputs.cache
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.exe
+C:\Users\aarnjunk\Documents\5_Koulu\Olio-ohjelmointi\Hide_N_Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.pdb
