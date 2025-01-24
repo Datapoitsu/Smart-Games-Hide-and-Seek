@@ -5,106 +5,214 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Hide_N_Seek
-{
-    class Square
-    {
-        public int[] cell;
-        public Square(int[] data)
-        {
-            cell = data;
-        }
-    }
-
-    class Tile
-    {
-        public bool[] cell;
-        public Tile(bool[] data)
-        {
-           cell = data;
-        }
-    }
+{    
     internal class Program
     {
+        static int[][][] presetChallenges = new int[][][] //[Game][problem][objectcount]
+        {
+            new int[][] //Safari
+            {
+                new int[]{0,5,0,0,0,0 }, //Starter 1
+                new int[]{0,0,0,0,0,5 },
+                new int[]{0,0,4,0,0,0 },
+                new int[]{0,0,0,4,3,0 },
+                new int[]{0,0,1,0,0,6 },
+                new int[]{0,0,3,0,3,0 },
+                new int[]{0,3,0,0,4,0 },
+                new int[]{0,0,3,1,0,0 },
+                new int[]{0,3,4,0,0,0 },
+                new int[]{0,0,0,0,3,2 },
+                new int[]{0,0,0,1,0,2 },
+                new int[]{0,0,0,4,0,3 },
+                new int[]{0,1,0,0,0,3 }, //Junior 12
+                new int[]{0,2,2,0,0,0 },
+                new int[]{0,2,0,5,0,0 },
+                new int[]{0,0,0,2,1,1 },
+                new int[]{0,2,3,0,2,2 },
+                new int[]{0,1,0,0,1,1 },
+                new int[]{0,2,0,5,0,0 },
+                new int[]{0,0,1,1,0,1 },
+                new int[]{0,3,3,2,1,0 },
+                new int[]{0,1,0,1,1,0 },
+                new int[]{0,0,4,1,0,1 },
+                new int[]{0,1,0,1,1,1 },
+                new int[]{0,1,1,0,0,5 }, //Expert 25
+                new int[]{0,0,4,1,1,0 },
+                new int[]{0,0,0,3,3,1 },
+                new int[]{0,4,3,1,0,0 },
+                new int[]{0,3,2,0,3,0 },
+                new int[]{0,1,3,0,2,0 },
+                new int[]{0,2,0,0,2,1 },
+                new int[]{0,0,3,0,3,1 },
+                new int[]{0,1,0,2,0,1 },
+                new int[]{0,0,2,2,4,0 },
+                new int[]{0,2,3,0,3,0 },
+                new int[]{0,1,0,2,2,0 },
+                new int[]{0,2,1,2,3,1 }, //Master 37
+                new int[]{0,4,0,1,0,1 },
+                new int[]{0,3,0,0,2,2 },
+                new int[]{0,0,1,0,3,2 },
+                new int[]{0,4,2,0,0,1 },
+                new int[]{0,1,0,4,0,1 },
+                new int[]{0,4,0,1,0,2 },
+                new int[]{0,0,3,3,1,0 },
+                new int[]{0,2,2,2,0,2 },
+                new int[]{0,1,4,1,1,0 },
+                new int[]{0,2,3,2,0,0 },
+                new int[]{0,3,1,1,1,2 },
+            },
+            new int[][] //Pirates  //{"Empty", "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" };
+            {
+                new int[]{0,0,5,0,0,0 }, //Starter 1
+                new int[]{0,0,0,2,3,0 },
+                new int[]{0,3,0,0,0,2 },
+                new int[]{0,0,0,2,0,2 },
+                new int[]{0,0,0,1,3,0 },
+                new int[]{0,2,0,2,3,0 },
+                new int[]{0,0,1,2,0,0 },
+                new int[]{0,2,5,0,0,0 },
+                new int[]{0,0,1,0,3,0 },
+                new int[]{0,0,0,2,0,3 },
+                new int[]{0,2,0,0,3,0 },
+                new int[]{0,0,0,2,1,0 },
+                new int[]{0,0,5,0,1,0 }, //Junior 13
+                new int[]{0,0,2,2,3,0 },
+                new int[]{0,0,0,2,2,3 },
+                new int[]{0,0,3,0,3,0 },
+                new int[]{0,0,3,0,0,0 },
+                new int[]{0,2,0,0,3,1 },
+                new int[]{0,1,0,2,1,3 },
+                new int[]{0,1,5,0,0,1 },
+                new int[]{0,0,1,1,3,2 },
+                new int[]{0,0,1,1,2,3 },
+                new int[]{0,0,1,0,1,1 },
+                new int[]{0,0,1,2,3,1 },
+                new int[]{0,0,3,0,3,1 }, //Expert 25
+                new int[]{0,0,1,0,1,2 },
+                new int[]{0,0,1,0,2,0 },
+                new int[]{0,0,0,1,2,2 },
+                new int[]{0,0,4,0,0,2 },
+                new int[]{0,0,4,0,2,1 },
+                new int[]{0,0,1,2,2,2 },
+                new int[]{0,0,0,1,1,1 },
+                new int[]{0,1,0,2,0,3 },
+                new int[]{0,1,0,1,3,2 },
+                new int[]{0,0,0,1,3,1 },
+                new int[]{0,0,0,1,2,0 },
+                new int[]{0,3,1,1,1,0 }, //Master 37
+                new int[]{0,2,0,1,1,0 },
+                new int[]{0,0,4,1,0,2 },
+                new int[]{0,2,1,2,0,0 },
+                new int[]{0,2,0,1,3,1 },
+                new int[]{0,0,0,2,2,2 },
+                new int[]{0,2,0,2,1,0 },
+                new int[]{0,0,2,1,2,2 },
+                new int[]{0,0,1,0,2,2 },
+                new int[]{0,0,4,0,1,2 },
+                new int[]{0,1,1,0,2,3 },
+                new int[]{0,0,0,1,1,2 },
+            }
+        };
+        
         static void Main(string[] args)
         {
-            while(true)
-            {
-                Square[] squares = new Square[0];
-                Tile[] tiles = new Tile[0];
-                string[] objectNames = new string[0];
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            int[][] squares;
+            bool[][] tiles;
+            string[] objectNames;
+            int emptyCount = 0; //Amount of holes in the pieces.
 
+            while (true)
+            {
                 Console.WriteLine("Choose game: ");
                 Console.WriteLine("0. Exit");
                 Console.WriteLine("1. Hide & Seek Safari");
                 Console.WriteLine("2. Hide & Seek Pirates");
-                bool validChoice = int.TryParse(Console.ReadLine(), out int choice);
+                bool validChoice = int.TryParse(Console.ReadLine(), out int gameChoice);
                 if(!validChoice)
                 {
                     continue;
                 }
 
-                switch (choice)
+                switch (gameChoice)
                 {
                     case 0:
                         return;
-                    case 1:
+                    case 1: //Hide and Seek Safari
 
-                        squares = new Square[] //Matches with object names array.
+                        squares = new int[][] //Matches with object names array.
                         {
-                        new Square(new int[]{0,-1,1,2,4,2,3,1,0}),
-                        new Square(new int[]{4,-1,1,-1,2,0,1,3,4}),
-                        new Square(new int[]{3,0,2,4,-1,4,1,-1,3}),
-                        new Square(new int[]{-1,-1,-1,-1,3,1,4,0,2}),
+                            new int[]{1,0,2,3,5,3,4,2,1},
+                            new int[]{5,0,2,0,3,1,2,4,5},
+                            new int[]{4,1,3,5,0,5,2,0,4},
+                            new int[]{0,0,0,0,4,2,5,1,3},
                         };
 
-                        tiles = new Tile[]
+                        tiles = new bool[][]
                         {
-                        new Tile(new bool[]{true,false,true,true,true,true,true,false,true}), //H-piece
-                        new Tile(new bool[]{true,false,true,true,false,true,true,true,true}), //U-piece
-                        new Tile(new bool[]{true,true,false,false,true,true,false,true,true}),//b-piece
-                        new Tile(new bool[]{true,true,false,true,true,true,true,false,true}), //R-piece
+                            new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
+                            new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
+                            new bool[]{true,true,false,false,true,true,false,true,true},//b-piece
+                            new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
                         };
-
-                        objectNames = new string[] { "Elephant", "Lion", "Zebra", "Rhino", "Gazelle" };
+                        emptyCount = 9;
+                        objectNames = new string[] {"Empty", "Elephant", "Lion", "Zebra", "Rhino", "Gazelle"};
 
                         break;
 
-                    case 2:
-                        squares = new Square[] //Matches with object names array.
+                    case 2: //Hide and Seek Pirates
+                        squares = new int[][] //Matches with object names array.
                         {
-                        new Square(new int[]{0,-1,0,-1,-1,-1,1,-1,2}),
-                        new Square(new int[]{-1,-1,2,-1,3,-1,4,-1,1}),
-                        new Square(new int[]{3,-1,1,-1,4,-1,-1,-1,1}),
-                        new Square(new int[]{0,-1,3,-1,1,-1,-1,-1,4}),
+                            new int[]{1,0,1,0,0,0,2,0,3},
+                            new int[]{0,0,3,0,4,0,5,0,2},
+                            new int[]{4,0,2,0,5,0,0,0,2},
+                            new int[]{1,0,4,0,2,0,0,0,5},
                         };
 
-                        tiles = new Tile[]
+                        tiles = new bool[][]
                         {
-                        new Tile(new bool[]{true,true,true,true,true,true,false,true,false}), //Sign-piece
-                        new Tile(new bool[]{true,true,false,true,false,true,true,true,true}),//L-piece
-                        new Tile(new bool[]{true,true,false, true, true,true, true, true,true}),//Top right empty piece
-                        new Tile(new bool[]{true,true,false,true,true,true,false, true, true}), //Top right & bottom left empty piece
+                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                            new bool[]{true,true,false,true,false,true,true,true,true},//L-piece
+                            new bool[]{true,true,false, true, true,true, true, true,true},//Top right empty piece
+                            new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
                         };
-
-                        objectNames = new string[] { "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" };
+                        emptyCount = 7;
+                        objectNames = new string[] {"Empty", "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" };
                         break;
                     default:
                         continue;
                 }
 
-                int[] animals = new int[objectNames.Length];
-                for (int i = 0; i < objectNames.Length; i++)
+                Console.WriteLine("Choose the puzzle from 1-" + presetChallenges[gameChoice - 1].Length + " or zero to input your own choice");
+                validChoice = int.TryParse(Console.ReadLine(), out int problemChoice);
+                if (!validChoice)
                 {
-                    Console.Write("How many " + objectNames[i] + ": ");
-                    animals[i] = int.Parse(Console.ReadLine());
+                    continue;
                 }
 
-                Console.OutputEncoding = System.Text.Encoding.Unicode;
+                int[] desiredResult = new int[objectNames.Length];
+                desiredResult[0] = emptyCount;
+                if (problemChoice == 0)
+                {
+                    //User inputs the amount of things to find.
+                    desiredResult[0] = emptyCount;
+                    for (int i = 1; i < objectNames.Length; i++)
+                    {
+                        Console.Write("How many " + objectNames[i] + ": ");
+                        desiredResult[i] = int.Parse(Console.ReadLine());
+                        desiredResult[0] -= desiredResult[i];
+                    }
+                }
+                else if (problemChoice > 0) //Preset values
+                {
+                    desiredResult = presetChallenges[gameChoice - 1][problemChoice - 1];
+                    desiredResult[0] = emptyCount - (desiredResult[1] + desiredResult[2] + desiredResult[3] + desiredResult[4] + desiredResult[5]);
+                }
 
                 int[] solution = new int[4];
                 while (true)
                 {
-                    if (checkResult(solution, squares, tiles, animals))
+                    if (checkResult(solution, squares, tiles, desiredResult))
                     {
                         showSolution(solution, tiles);
                         break;
@@ -183,8 +291,12 @@ namespace Hide_N_Seek
             return true;
         }
 
-        public static bool checkResult(int[] data, Square[] square, Tile[] tiles, int[] desiredResult)
+        public static bool checkResult(int[] data, int[][] square, bool[][] tiles, int[] desiredResult)
         {
+            if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
+            {
+                //Console.WriteLine("haluttu tulos: " + desiredResult[0] + ", " + desiredResult[1] + ", " + desiredResult[2] + ", " + desiredResult[3] + ", " + desiredResult[4] + ", " + desiredResult[5]);
+            }
             //Checks if inputted data is valid.
             int[] holder = (int[])data.Clone();
             for(int i = 0; i < holder.Length; i++)
@@ -192,49 +304,50 @@ namespace Hide_N_Seek
                 holder[i] %= 4;
             }
             if (!noDublicates(holder))
-            { 
+            {
                 return false;
             }
             
             int[] items = new int[desiredResult.Length];
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++) //Jokainen laatta.
             {
-                Tile T = tiles[data[i] % 4];
+                bool[] T = tiles[data[i] % 4];
                 int rotateAmount = (int)Math.Floor(data[i] / 4.0);
-                bool[] currentTile = rotate(T.cell,rotateAmount);
-                for(int k = 0; k < currentTile.Length; k++)
+                bool[] currentTile = rotate(T,rotateAmount);
+                for(int k = 0; k < currentTile.Length; k++) //Laatan ruudut.
                 {
                     if (currentTile[k] == false)
                     {
-                        if(square[i].cell[k] != -1)
-                        {
-                            items[square[i].cell[k]]++;
-                        }
+                        items[square[i][k]]++;
                     }
 
                     for (int j = 0; j < desiredResult.Length; j++)
                     {
                         if (items[i] > desiredResult[i])
                         {
+                            if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
+                            {
+                                //Console.WriteLine("liian monta " + i + "");
+                                //Console.WriteLine("Nyt on " + items[i] + ", pitäisi olla " + desiredResult[i]);
+                            }
                             return false;
                         }
                     }
                 }
             }
-
+            //if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
+                //Console.WriteLine("Items: " + items[0] + ", " + items[1] + ", " + items[2] + ", " + items[3] + ", " + items[4] + ", " + items[5]);
             return sameArray(items, desiredResult);
         }
 
-        static public void showSolution(int[] data, Tile[] tiles)
+        static public void showSolution(int[] data, bool[][] tiles)
         {
-            Tile[] T = new Tile[tiles.Length];
+            //Console.WriteLine("Tulos: " + data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3]);
+            bool[][] T = new bool[tiles.GetLength(0)][];
             for (int i = 0; i < 4; i++)
             {
-                T[i] = tiles[data[i] % 4];
-                T[i].cell = rotate(T[i].cell, (int)Math.Floor(data[i] / 4.0));
+                T[i] = rotate(tiles[data[i] % 4], (int)Math.Floor(data[i] / 4.0));
             }
-            char merkki;
-
 
             for (int i = 0; i < 9; i++)
             {
@@ -242,59 +355,29 @@ namespace Hide_N_Seek
             }
             Console.Write("\n");
 
-            for (int j = 0; j < 3; j++)
+            for(int l = 0; l < 2; l++)
             {
-                for (int k = 0; k < 2; k++)
+                for (int j = 0; j < 3; j++)
                 {
-                    Console.Write(" ");
-                    for (int i = 0 + j * 3; i < 3 + j * 3; i++)
+                    for (int k = 0 + 2 * l; k < 2 + 2 * l; k++)
                     {
-                        if (T[k].cell[i] == true)
+                        Console.Write(" ");
+                        for (int i = 0 + j * 3; i < 3 + j * 3; i++)
                         {
-                            merkki = '█';
+                            char merkki = ' ';
+                            if (T[k][i] == true)
+                            {
+                                merkki = '█';
+                            }
+                            Console.Write(merkki);
                         }
-                        else
-                        {
-                            merkki = ' ';
-                        }
-                        Console.Write(merkki);
                     }
+                    Console.WriteLine();
                 }
-                Console.Write(" \n");
+                Console.WriteLine();
             }
+            
 
-            for (int i = 0; i < 9; i++)
-            {
-                Console.Write(" ");
-            }
-            Console.Write("\n");
-
-            for (int j = 0; j < 3; j++)
-            {
-                for (int k = 2; k < 4; k++)
-                {
-                    Console.Write(" ");
-                    for (int i = 0 + j * 3; i < 3 + j * 3; i++)
-                    {
-                        if (T[k].cell[i] == true)
-                        {
-                            merkki = '█';
-                        }
-                        else
-                        {
-                            merkki = ' ';
-                        }
-                        Console.Write(merkki);
-                    }
-                }
-                Console.Write(" \n");
-            }
-
-            for (int i = 0; i < 9; i++)
-            {
-                Console.Write(" ");
-            }
-            Console.Write("\n");
         }
     }
 }
