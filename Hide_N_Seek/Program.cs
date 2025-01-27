@@ -148,7 +148,7 @@ namespace Hide_N_Seek
                             new int[]{0,0,0,0,4,2,5,1,3},
                         };
 
-                        tiles = new bool[][]
+                        tiles = new bool[][] //Don't change the order, H-piece must be firts
                         {
                             new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
                             new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
@@ -169,12 +169,12 @@ namespace Hide_N_Seek
                             new int[]{1,0,4,0,2,0,0,0,5},
                         };
 
-                        tiles = new bool[][]
+                        tiles = new bool[][] //Don't change the order!
                         {
-                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
-                            new bool[]{true,true,false,true,false,true,true,true,true},//L-piece
-                            new bool[]{true,true,false, true, true,true, true, true,true},//Top right empty piece
                             new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                            new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
+                            new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
                         };
                         emptyCount = 7;
                         objectNames = new string[] {"Empty", "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" };
@@ -191,16 +191,20 @@ namespace Hide_N_Seek
                 }
 
                 int[] desiredResult = new int[objectNames.Length];
-                desiredResult[0] = emptyCount;
-                if (problemChoice == 0)
+                if (problemChoice == 0) //User inputs the amount of things to find.
                 {
-                    //User inputs the amount of things to find.
+                    Console.WriteLine("Input the amount of objects:");
                     desiredResult[0] = emptyCount;
                     for (int i = 1; i < objectNames.Length; i++)
                     {
-                        Console.Write("How many " + objectNames[i] + ": ");
+                        Console.Write(objectNames[i] + ": ");
                         desiredResult[i] = int.Parse(Console.ReadLine());
                         desiredResult[0] -= desiredResult[i];
+                    }
+                    if (desiredResult[0] < 0)
+                    {
+                        Console.WriteLine("Too many objects. Limit is " + emptyCount);
+                        continue;
                     }
                 }
                 else if (problemChoice > 0) //Preset values
@@ -209,7 +213,7 @@ namespace Hide_N_Seek
                     desiredResult[0] = emptyCount - (desiredResult[1] + desiredResult[2] + desiredResult[3] + desiredResult[4] + desiredResult[5]);
                 }
 
-                int[] solution = new int[4];
+                int[] solution = new int[4]; //Brute forcing all solutions.
                 while (true)
                 {
                     if (checkResult(solution, squares, tiles, desiredResult))
@@ -226,12 +230,15 @@ namespace Hide_N_Seek
                 }
                 Console.ReadLine();
             }
-            
         }
 
         static public int[] increase(int[] data, int index)
         {
             data[index] = (data[index] + 1) % 16;
+            if (data[index] == 8 || data[index] == 12) //Skips mirrored pieces.
+            {
+                return increase(data, index);
+            }
             if (data[index] == 0 && index > 0)
             {
                 return increase(data, index -1);
@@ -260,15 +267,48 @@ namespace Hide_N_Seek
             return rotate(Copy, index - 1);
         }
 
-        static public bool sameArray(int[] a, int[] b)
+
+        public static bool checkResult(int[] data, int[][] square, bool[][] tiles, int[] desiredResult)
         {
-            if(a.Length != b.Length)
+            //Checks if inputted data is valid.
+            int[] holder = (int[])data.Clone();
+            for(int i = 0; i < holder.Length; i++)
             {
-                return false;
+                holder[i] %= 4;
             }
-            for(int i = 0; i < a.Length; i++)
+            Array.Sort(holder);
+            for(int i = 0; i < 4; i++)
             {
-                if (a[i] != b[i])
+                if (holder[i] != i)
+                {
+                    return false;
+                }
+            }
+            
+            int[] items = new int[desiredResult.Length]; //Adds all seen objects to the list.
+            for (int tileIndex = 0; tileIndex < data.Length; tileIndex++)
+            {
+                bool[] currentTile = rotate(tiles[data[tileIndex] % 4], (int)Math.Floor(data[tileIndex] / 4.0));
+                for(int tilePartIndex = 0; tilePartIndex < currentTile.Length; tilePartIndex++)
+                {
+                    if (currentTile[tilePartIndex] == false) //Increases the seen object, when there is a hole in the piece.
+                    {
+                        items[square[tileIndex][tilePartIndex]]++;
+                    }
+
+                    for (int j = 0; j < desiredResult.Length; j++)
+                    {
+                        if (items[tileIndex] > desiredResult[tileIndex])
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            for(int i = 0; i < desiredResult.Length; i++) //Checks that arrays are the same.
+            {
+                if (items[i] != desiredResult[i])
                 {
                     return false;
                 }
@@ -276,96 +316,26 @@ namespace Hide_N_Seek
             return true;
         }
 
-        static public bool noDublicates(int[] data)
-        {
-            for(int i = 0; i < data.Length; i++)
-            {
-                for(int k = 0; k < data.Length; k++)
-                {
-                    if(i != k && data[i] == data[k])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public static bool checkResult(int[] data, int[][] square, bool[][] tiles, int[] desiredResult)
-        {
-            if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
-            {
-                //Console.WriteLine("haluttu tulos: " + desiredResult[0] + ", " + desiredResult[1] + ", " + desiredResult[2] + ", " + desiredResult[3] + ", " + desiredResult[4] + ", " + desiredResult[5]);
-            }
-            //Checks if inputted data is valid.
-            int[] holder = (int[])data.Clone();
-            for(int i = 0; i < holder.Length; i++)
-            {
-                holder[i] %= 4;
-            }
-            if (!noDublicates(holder))
-            {
-                return false;
-            }
-            
-            int[] items = new int[desiredResult.Length];
-            for (int i = 0; i < data.Length; i++) //Jokainen laatta.
-            {
-                bool[] T = tiles[data[i] % 4];
-                int rotateAmount = (int)Math.Floor(data[i] / 4.0);
-                bool[] currentTile = rotate(T,rotateAmount);
-                for(int k = 0; k < currentTile.Length; k++) //Laatan ruudut.
-                {
-                    if (currentTile[k] == false)
-                    {
-                        items[square[i][k]]++;
-                    }
-
-                    for (int j = 0; j < desiredResult.Length; j++)
-                    {
-                        if (items[i] > desiredResult[i])
-                        {
-                            if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
-                            {
-                                //Console.WriteLine("liian monta " + i + "");
-                                //Console.WriteLine("Nyt on " + items[i] + ", pitäisi olla " + desiredResult[i]);
-                            }
-                            return false;
-                        }
-                    }
-                }
-            }
-            //if (data[0] == 6 && data[1] == 4 && data[2] == 1 && data[3] == 3)
-                //Console.WriteLine("Items: " + items[0] + ", " + items[1] + ", " + items[2] + ", " + items[3] + ", " + items[4] + ", " + items[5]);
-            return sameArray(items, desiredResult);
-        }
-
         static public void showSolution(int[] data, bool[][] tiles)
         {
-            //Console.WriteLine("Tulos: " + data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3]);
-            bool[][] T = new bool[tiles.GetLength(0)][];
+            bool[][] T = new bool[tiles.GetLength(0)][]; //Creates rotated versions of the tiles.
             for (int i = 0; i < 4; i++)
             {
                 T[i] = rotate(tiles[data[i] % 4], (int)Math.Floor(data[i] / 4.0));
             }
 
-            for (int i = 0; i < 9; i++)
+            Console.WriteLine();
+            for(int tileVertical = 0; tileVertical < 2; tileVertical++)
             {
-                Console.Write(" ");
-            }
-            Console.Write("\n");
-
-            for(int l = 0; l < 2; l++)
-            {
-                for (int j = 0; j < 3; j++)
+                for (int row = 0; row < 3; row++)
                 {
-                    for (int k = 0 + 2 * l; k < 2 + 2 * l; k++)
+                    for (int tileHorizontal = 0 + 2 * tileVertical; tileHorizontal < 2 + 2 * tileVertical; tileHorizontal++)
                     {
                         Console.Write(" ");
-                        for (int i = 0 + j * 3; i < 3 + j * 3; i++)
+                        for (int column = 0 + row * 3; column < 3 + row * 3; column++)
                         {
                             char merkki = ' ';
-                            if (T[k][i] == true)
+                            if (T[tileHorizontal][column] == true)
                             {
                                 merkki = '█';
                             }
@@ -376,8 +346,6 @@ namespace Hide_N_Seek
                 }
                 Console.WriteLine();
             }
-            
-
         }
     }
 }
