@@ -611,7 +611,6 @@ namespace Hide_N_Seek
             return rotate(Copy, index - 1);
         }
 
-
         public static bool checkResult(int[] data, int[][] square, bool[][] tiles, int[] desiredResult)
         {
             //Checks if inputted data is valid.
