@@ -6,430 +6,548 @@ using System.Threading.Tasks;
 
 namespace Hide_N_Seek
 {    
+    public class Game
+    {
+        public string name;
+        public int[][] squares; //Objects on the board listed in order of appearance [tile][index]
+        public string[] objectNames;
+        public bool[][] tiles; //Don't change the order!
+        public int[] skipIndexes;
+        public int[][] presetChallenges; //All challenges from the games.
+        public int maxEmptyCount = 0;
+        public Game (string name, int[][] squares, string[] objectNames, bool[][] tiles, int[] skipIndexes, int[][] presetChallenges)
+        {
+            this.name = name;
+            this.squares = squares;
+            this.objectNames = objectNames;
+            this.tiles = tiles;
+            this.skipIndexes = skipIndexes;
+            this.presetChallenges = presetChallenges;
+            maxEmptyCount = countMaxEmpty(tiles);
+        }
+
+        public int countMaxEmpty(bool[][] tiles)
+        {
+            int[] emptyCounts = new int[tiles.Length];
+            for(int i = 0; i < tiles.Length; i++)
+            {
+                for(int k = 0; k < tiles[i].Length; k++)
+                {
+                    if (tiles[i][k] == false)
+                    {
+                        emptyCounts[i]++;
+                    }
+                }
+            }
+            Array.Sort(emptyCounts);
+            return emptyCounts[tiles.Length - 1] + emptyCounts[tiles.Length - 2] + emptyCounts[tiles.Length - 3] + emptyCounts[tiles.Length - 4];
+        }
+    };
+
     internal class Program
     {
-        static int[][][] presetChallenges = new int[][][] //[Game][problem][objectcount]
+        public static Game[] games = new Game[]
         {
-            new int[][] //Safari
-            {
-                new int[]{0,5,0,0,0,0 }, //Starter 1
-                new int[]{0,0,0,0,5,0 },
-                new int[]{0,0,4,0,0,0 },
-                new int[]{0,0,0,4,0,3 },
-                new int[]{0,0,1,0,6,0 },
-                new int[]{0,0,3,0,0,3 },
-                new int[]{0,3,0,0,0,4 },
-                new int[]{0,0,3,1,0,0 },
-                new int[]{0,3,4,0,0,0 },
-                new int[]{0,0,0,0,2,3 },
-                new int[]{0,0,0,1,2,0 },
-                new int[]{0,0,0,4,3,0 },
-                new int[]{0,1,0,0,3,0 }, //Junior 12
-                new int[]{0,2,2,0,0,0 },
-                new int[]{0,2,0,5,0,0 },
-                new int[]{0,0,0,2,1,1 },
-                new int[]{0,2,3,0,2,2 },
-                new int[]{0,1,0,0,1,1 },
-                new int[]{0,2,0,5,0,0 },
-                new int[]{0,0,1,1,1,0 },
-                new int[]{0,3,3,2,0,1 },
-                new int[]{0,1,0,1,0,1 },
-                new int[]{0,0,4,1,1,0 },
-                new int[]{0,1,0,1,1,1 },
-                new int[]{0,1,1,0,5,0 }, //Expert 25
-                new int[]{0,0,4,1,0,1 },
-                new int[]{0,0,0,3,1,3 },
-                new int[]{0,4,3,1,0,0 },
-                new int[]{0,3,2,0,0,3 },
-                new int[]{0,1,3,0,0,2 },
-                new int[]{0,2,0,0,1,2 },
-                new int[]{0,0,3,0,1,3 },
-                new int[]{0,1,0,2,1,0 },
-                new int[]{0,0,2,2,0,4 },
-                new int[]{0,2,3,0,0,3 },
-                new int[]{0,1,0,2,0,2 },
-                new int[]{0,2,1,2,1,3 }, //Master 37
-                new int[]{0,4,0,1,1,0 },
-                new int[]{0,3,0,0,2,2 },
-                new int[]{0,0,1,0,2,3 },
-                new int[]{0,4,2,0,1,0 },
-                new int[]{0,1,0,4,1,0 },
-                new int[]{0,4,0,1,2,0 },
-                new int[]{0,0,3,3,0,1 },
-                new int[]{0,2,2,2,2,0 },
-                new int[]{0,1,4,1,0,1 },
-                new int[]{0,2,3,2,0,0 },
-                new int[]{0,3,1,1,2,1 },
-            },
-            new int[][] //Pirates
-            {
-                new int[]{0,0,5,0,0,0 }, //Starter 1
-                new int[]{0,0,0,2,3,0 },
-                new int[]{0,3,0,0,0,2 },
-                new int[]{0,0,0,2,0,2 },
-                new int[]{0,0,0,1,3,0 },
-                new int[]{0,2,0,2,3,0 },
-                new int[]{0,0,1,2,0,0 },
-                new int[]{0,2,5,0,0,0 },
-                new int[]{0,0,1,0,3,0 },
-                new int[]{0,0,0,2,0,3 },
-                new int[]{0,2,0,0,3,0 },
-                new int[]{0,0,0,2,1,0 },
-                new int[]{0,0,5,0,1,0 }, //Junior 13
-                new int[]{0,0,2,2,3,0 },
-                new int[]{0,0,0,2,2,3 },
-                new int[]{0,0,3,0,3,0 },
-                new int[]{0,0,3,0,0,0 },
-                new int[]{0,2,0,0,3,1 },
-                new int[]{0,1,0,2,1,3 },
-                new int[]{0,1,5,0,0,1 },
-                new int[]{0,0,1,1,3,2 },
-                new int[]{0,0,1,1,2,3 },
-                new int[]{0,0,1,0,1,1 },
-                new int[]{0,0,1,2,3,1 },
-                new int[]{0,0,3,0,3,1 }, //Expert 25
-                new int[]{0,0,1,0,1,2 },
-                new int[]{0,0,1,0,2,0 },
-                new int[]{0,0,0,1,2,2 },
-                new int[]{0,0,4,0,0,2 },
-                new int[]{0,0,4,0,2,1 },
-                new int[]{0,0,1,2,2,2 },
-                new int[]{0,0,0,1,1,1 },
-                new int[]{0,1,0,2,0,3 },
-                new int[]{0,1,0,1,3,2 },
-                new int[]{0,0,0,1,3,1 },
-                new int[]{0,0,0,1,2,0 },
-                new int[]{0,3,1,1,1,0 }, //Master 37
-                new int[]{0,2,0,1,1,0 },
-                new int[]{0,0,4,1,0,2 },
-                new int[]{0,2,1,2,0,0 },
-                new int[]{0,2,0,1,3,1 },
-                new int[]{0,0,0,2,2,2 },
-                new int[]{0,2,0,2,1,0 },
-                new int[]{0,0,2,1,2,2 },
-                new int[]{0,0,1,0,2,2 },
-                new int[]{0,0,4,0,1,2 },
-                new int[]{0,1,1,0,2,3 },
-                new int[]{0,0,0,1,1,2 },
-            },
-            new int[][] //Monsters
-            {
-                new int[]{0,0,0,0,0,0,0,7,0},//Starter 1
-                new int[]{0,0,0,0,4,0,0,0,0},
-                new int[]{0,0,0,4,0,0,0,0,0},
-                new int[]{0,4,0,0,0,0,0,0,0},
-                new int[]{0,0,1,3,0,0,0,0,0},
-                new int[]{0,0,0,3,0,1,0,0,0},
-                new int[]{0,2,2,0,0,0,1,0,0},
-                new int[]{0,0,0,3,0,0,1,0,0},
-                new int[]{0,0,0,2,0,0,0,3,0},
-                new int[]{0,0,2,2,0,0,1,0,0},
-                new int[]{0,2,0,1,0,2,0,0,0},
-                new int[]{0,1,0,0,1,2,0,1,0},
-                new int[]{0,0,0,0,2,0,0,0,1},
-                new int[]{0,3,0,0,0,0,0,0,2},
-                new int[]{0,0,1,0,0,1,1,0,1},
-                new int[]{0,0,0,0,3,0,1,0,0},
-                new int[]{0,0,0,0,1,0,0,1,0},//Junior 17
-                new int[]{0,3,0,0,0,0,0,1,0},
-                new int[]{0,0,0,0,0,0,0,0,0},
-                new int[]{0,0,0,2,0,0,0,0,1},
-                new int[]{0,2,0,1,0,0,0,0,2},
-                new int[]{0,0,0,0,2,1,0,1,0},
-                new int[]{0,0,0,0,2,0,0,3,0},
-                new int[]{0,0,2,0,1,1,0,2,0},
-                new int[]{0,0,2,2,1,0,1,0,0},
-                new int[]{0,0,2,1,0,1,0,3,0},
-                new int[]{0,0,0,4,1,0,0,0,1},
-                new int[]{0,0,0,0,3,0,1,2,0},
-                new int[]{0,0,0,0,0,0,0,0,0},
-                new int[]{0,0,0,0,0,1,1,2,0},
-                new int[]{0,0,2,0,2,1,0,1,0},
-                new int[]{0,0,0,3,1,0,0,3,0},
-                new int[]{0,3,0,0,1,0,0,3,0},
-                new int[]{0,1,0,1,0,1,0,3,0},
-                new int[]{0,1,0,0,0,0,0,2,1}, //Expert 33
-                new int[]{0,0,1,3,0,1,0,1,0},
-                new int[]{0,0,0,0,1,1,1,1,0},
-                new int[]{0,1,0,0,0,0,2,3,0},
-                new int[]{0,1,1,1,1,1,0,0,2},
-                new int[]{0,0,0,2,1,1,0,0,0},
-                new int[]{0,0,0,2,2,1,2,0,0},
-                new int[]{0,2,0,0,0,0,0,3,1},
-                new int[]{0,2,0,0,2,0,0,0,0},
-                new int[]{0,0,0,0,2,0,0,2,1},
-                new int[]{0,0,1,0,0,1,1,1,1},
-                new int[]{0,0,1,0,3,1,0,2,0},
-                new int[]{0,0,0,0,1,1,1,2,0},
-                new int[]{0,0,0,2,1,0,2,0,0},
-                new int[]{0,1,1,0,0,0,2,0,0},
-                new int[]{0,2,1,1,0,0,2,0,0},
-                new int[]{0,0,0,0,0,0,0,0,0},//Master 49
-                new int[]{0,0,0,2,0,0,0,2,0},
-                new int[]{0,0,0,2,1,0,1,0,0},
-                new int[]{0,2,1,0,0,1,0,1,0},
-                new int[]{0,1,0,0,1,0,1,0,2},
-                new int[]{0,0,0,2,0,0,1,0,1},
-                new int[]{0,1,0,1,0,1,1,1,0},
-                new int[]{0,2,0,0,0,1,2,2,0},
-                new int[]{0,1,0,0,1,1,0,0,1},
-                new int[]{0,0,0,0,2,0,2,2,0},
-                new int[]{0,1,1,0,1,1,0,0,1},
-                new int[]{0,1,0,0,0,1,1,2,0},
-                new int[]{0,0,0,1,2,0,1,0,0},
-            },
-            new int[][] //Dora is searching for her friends
-            {
-
-            },
-            new int[][] //Hide & Seek Canada Cache-Cahce
-            {
-
-            },
-            new int[][] //Hide & Seek Safari Booster
-            {
-                new int[]{0,0,5,0,0,0}, //Starter 1
-                new int[]{0,1,0,0,0,1},
-                new int[]{0,0,1,0,0,4},
-                new int[]{0,0,2,0,0,0},
-                new int[]{0,0,0,0,6,0},
-                new int[]{0,5,0,0,1,2},
-                new int[]{0,2,0,0,6,1},
-                new int[]{0,0,2,5,0,0},
-                new int[]{0,5,0,0,0,1},
-                new int[]{0,2,0,0,1,5},
-                new int[]{0,0,2,0,6,0},
-                new int[]{0,0,0,2,1,0},
-                new int[]{0,4,0,0,3,0},
-                new int[]{0,1,0,5,0,1},
-                new int[]{0,0,1,0,0,1},
-                new int[]{0,2,0,1,0,5}, //Junior 15
-                new int[]{0,0,0,0,4,0},
-                new int[]{0,5,0,0,0,2},
-                new int[]{0,0,0,3,0,4},
-                new int[]{0,4,0,1,2,1},
-                new int[]{0,0,2,1,0,5},
-                new int[]{0,4,0,0,3,1},
-                new int[]{0,0,0,3,0,3},
-                new int[]{0,4,1,0,3,1},
-                new int[]{0,0,0,4,3,0},
-                new int[]{0,5,3,0,0,0},
-                new int[]{0,3,0,2,1,3},
-                new int[]{0,0,5,0,2,1},
-                new int[]{0,2,1,4,0,1},
-                new int[]{0,4,1,1,2,1},
-                new int[]{0,0,3,0,0,1}, //Expert 30
-                new int[]{0,1,3,3,0,0},
-                new int[]{0,3,2,1,3,0},
-                new int[]{0,1,5,1,0,0},
-                new int[]{0,3,1,0,4,0},
-                new int[]{0,1,0,3,0,4},
-                new int[]{0,0,4,0,4,0},
-                new int[]{0,2,0,0,0,2},
-                new int[]{0,3,2,1,1,2},
-                new int[]{0,2,2,1,3,1},
-                new int[]{0,2,4,0,0,3},
-                new int[]{0,3,4,0,0,2},
-                new int[]{0,0,1,3,3,2},
-                new int[]{0,4,3,0,1,0},
-                new int[]{0,0,4,2,0,0}, //Master 46
-                new int[]{0,1,1,1,0,0},
-                new int[]{0,0,4,0,0,1},
-                new int[]{0,1,1,3,1,3},
-                new int[]{0,1,5,1,0,1},
-                new int[]{0,3,1,3,0,1},
-                new int[]{0,1,1,2,2,3},
-                new int[]{0,0,4,2,0,1},
-                new int[]{0,3,4,1,0,0},
-                new int[]{0,2,3,0,3,1},
-                new int[]{0,2,1,1,4,0},
-                new int[]{0,1,1,0,2,4},
-                new int[]{0,0,1,1,0,1},
-                new int[]{0,1,4,2,0,0},
-                new int[]{0,3,2,0,1,3},
-            }
+            new Game(
+                "Hide and Seek Safari",
+                new int[][]
+                {
+                    new int[]{1,0,2,3,4,3,5,2,1},
+                    new int[]{4,0,2,0,3,1,2,5,4},
+                    new int[]{5,1,3,4,0,4,2,0,5},
+                    new int[]{0,0,0,0,5,2,4,1,3},
+                },
+                new string[] {"Empty", "Elephant", "Lion", "Zebra", "Gazelle", "Rhino" },
+                new bool[][]
+                {
+                    new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
+                    new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
+                    new bool[]{true,true,false,false,true,true,false,true,true},//b-piece
+                    new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
+                },
+                new int[] { 8, 12 },
+                new int[][]
+                {
+                    new int[]{0,5,0,0,0,0 }, //Starter 1
+                    new int[]{0,0,0,0,5,0 },
+                    new int[]{0,0,4,0,0,0 },
+                    new int[]{0,0,0,4,0,3 },
+                    new int[]{0,0,1,0,6,0 },
+                    new int[]{0,0,3,0,0,3 },
+                    new int[]{0,3,0,0,0,4 },
+                    new int[]{0,0,3,1,0,0 },
+                    new int[]{0,3,4,0,0,0 },
+                    new int[]{0,0,0,0,2,3 },
+                    new int[]{0,0,0,1,2,0 },
+                    new int[]{0,0,0,4,3,0 },
+                    new int[]{0,1,0,0,3,0 }, //Junior 12
+                    new int[]{0,2,2,0,0,0 },
+                    new int[]{0,2,0,5,0,0 },
+                    new int[]{0,0,0,2,1,1 },
+                    new int[]{0,2,3,0,2,2 },
+                    new int[]{0,1,0,0,1,1 },
+                    new int[]{0,2,0,5,0,0 },
+                    new int[]{0,0,1,1,1,0 },
+                    new int[]{0,3,3,2,0,1 },
+                    new int[]{0,1,0,1,0,1 },
+                    new int[]{0,0,4,1,1,0 },
+                    new int[]{0,1,0,1,1,1 },
+                    new int[]{0,1,1,0,5,0 }, //Expert 25
+                    new int[]{0,0,4,1,0,1 },
+                    new int[]{0,0,0,3,1,3 },
+                    new int[]{0,4,3,1,0,0 },
+                    new int[]{0,3,2,0,0,3 },
+                    new int[]{0,1,3,0,0,2 },
+                    new int[]{0,2,0,0,1,2 },
+                    new int[]{0,0,3,0,1,3 },
+                    new int[]{0,1,0,2,1,0 },
+                    new int[]{0,0,2,2,0,4 },
+                    new int[]{0,2,3,0,0,3 },
+                    new int[]{0,1,0,2,0,2 },
+                    new int[]{0,2,1,2,1,3 }, //Master 37
+                    new int[]{0,4,0,1,1,0 },
+                    new int[]{0,3,0,0,2,2 },
+                    new int[]{0,0,1,0,2,3 },
+                    new int[]{0,4,2,0,1,0 },
+                    new int[]{0,1,0,4,1,0 },
+                    new int[]{0,4,0,1,2,0 },
+                    new int[]{0,0,3,3,0,1 },
+                    new int[]{0,2,2,2,2,0 },
+                    new int[]{0,1,4,1,0,1 },
+                    new int[]{0,2,3,2,0,0 },
+                    new int[]{0,3,1,1,2,1 },
+                }
+                ),
+            new Game(
+                "Hide and Seek Safari booster",
+                new int[][]
+                {
+                    new int[]{1,0,2,3,4,3,5,2,1},
+                    new int[]{4,0,2,0,3,1,2,5,4},
+                    new int[]{5,1,3,4,0,4,2,0,5},
+                    new int[]{0,0,0,0,5,2,4,1,3},
+                },
+                new string[] {"Empty", "Elephant", "Lion", "Zebra", "Gazelle", "Rhino" },
+                new bool[][]
+                {
+                    new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
+                    new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
+                    new bool[]{true,true,false,false,true,true,false,true,true},//b-piece
+                    new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
+                    new bool[]{false,true,true,true,true,true,true,false,true}, //Mirrored R-piece
+                },
+                new int[] { 10, 15 },
+                new int[][]
+                {
+                    new int[]{0,0,5,0,0,0}, //Starter 1
+                    new int[]{0,1,0,0,0,1},
+                    new int[]{0,0,1,0,0,4},
+                    new int[]{0,0,2,0,0,0},
+                    new int[]{0,0,0,0,6,0},
+                    new int[]{0,5,0,0,1,2},
+                    new int[]{0,2,0,0,6,1},
+                    new int[]{0,0,2,5,0,0},
+                    new int[]{0,5,0,0,0,1},
+                    new int[]{0,2,0,0,1,5},
+                    new int[]{0,0,2,0,6,0},
+                    new int[]{0,0,0,2,1,0},
+                    new int[]{0,4,0,0,3,0},
+                    new int[]{0,1,0,5,0,1},
+                    new int[]{0,0,1,0,0,1},
+                    new int[]{0,2,0,1,0,5}, //Junior 15
+                    new int[]{0,0,0,0,4,0},
+                    new int[]{0,5,0,0,0,2},
+                    new int[]{0,0,0,3,0,4},
+                    new int[]{0,4,0,1,2,1},
+                    new int[]{0,0,2,1,0,5},
+                    new int[]{0,4,0,0,3,1},
+                    new int[]{0,0,0,3,0,3},
+                    new int[]{0,4,1,0,3,1},
+                    new int[]{0,0,0,4,3,0},
+                    new int[]{0,5,3,0,0,0},
+                    new int[]{0,3,0,2,1,3},
+                    new int[]{0,0,5,0,2,1},
+                    new int[]{0,2,1,4,0,1},
+                    new int[]{0,4,1,1,2,1},
+                    new int[]{0,0,3,0,0,1}, //Expert 30
+                    new int[]{0,1,3,3,0,0},
+                    new int[]{0,3,2,1,3,0},
+                    new int[]{0,1,5,1,0,0},
+                    new int[]{0,3,1,0,4,0},
+                    new int[]{0,1,0,3,0,4},
+                    new int[]{0,0,4,0,4,0},
+                    new int[]{0,2,0,0,0,2},
+                    new int[]{0,3,2,1,1,2},
+                    new int[]{0,1,1,2,1,4},
+                    new int[]{0,2,2,1,3,1},
+                    new int[]{0,2,4,0,0,3},
+                    new int[]{0,3,4,0,0,2},
+                    new int[]{0,0,1,3,3,2},
+                    new int[]{0,4,3,0,1,0},
+                    new int[]{0,0,4,2,0,0}, //Master 46
+                    new int[]{0,1,1,1,0,0},
+                    new int[]{0,0,4,0,0,1},
+                    new int[]{0,1,1,3,1,3},
+                    new int[]{0,1,5,1,0,1},
+                    new int[]{0,3,1,3,0,1},
+                    new int[]{0,1,1,2,2,3},
+                    new int[]{0,0,4,2,0,1},
+                    new int[]{0,3,4,1,0,0},
+                    new int[]{0,2,3,0,3,1},
+                    new int[]{0,2,1,1,4,0},
+                    new int[]{0,1,1,0,2,4},
+                    new int[]{0,0,1,1,0,1},
+                    new int[]{0,1,4,2,0,0},
+                    new int[]{0,3,2,0,1,3},
+                }
+                ),
+            new Game(
+                "Hide and Seek Pirates",
+                new int[][]
+                {
+                    new int[]{1,0,1,0,0,0,2,0,3},
+                    new int[]{0,0,3,0,4,0,5,0,2},
+                    new int[]{4,0,2,0,5,0,0,0,2},
+                    new int[]{1,0,4,0,2,0,0,0,5},
+                },
+                new string[] {"Empty", "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" },
+                new bool[][]
+                {
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                    new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
+                    new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
+                },
+                new int[] { 8, 12 },
+                new int[][]
+                {
+                    new int[]{0,0,5,0,0,0 }, //Starter 1
+                    new int[]{0,0,0,2,3,0 },
+                    new int[]{0,3,0,0,0,2 },
+                    new int[]{0,0,0,2,0,2 },
+                    new int[]{0,0,0,1,3,0 },
+                    new int[]{0,2,0,2,3,0 },
+                    new int[]{0,0,1,2,0,0 },
+                    new int[]{0,2,5,0,0,0 },
+                    new int[]{0,0,1,0,3,0 },
+                    new int[]{0,0,0,2,0,3 },
+                    new int[]{0,2,0,0,3,0 },
+                    new int[]{0,0,0,2,1,0 },
+                    new int[]{0,0,5,0,1,0 }, //Junior 13
+                    new int[]{0,0,2,2,3,0 },
+                    new int[]{0,0,0,2,2,3 },
+                    new int[]{0,0,3,0,3,0 },
+                    new int[]{0,0,3,0,0,0 },
+                    new int[]{0,2,0,0,3,1 },
+                    new int[]{0,1,0,2,1,3 },
+                    new int[]{0,1,5,0,0,1 },
+                    new int[]{0,0,1,1,3,2 },
+                    new int[]{0,0,1,1,2,3 },
+                    new int[]{0,0,1,0,1,1 },
+                    new int[]{0,0,1,2,3,1 },
+                    new int[]{0,0,3,0,3,1 }, //Expert 25
+                    new int[]{0,0,1,0,1,2 },
+                    new int[]{0,0,1,0,2,0 },
+                    new int[]{0,0,0,1,2,2 },
+                    new int[]{0,0,4,0,0,2 },
+                    new int[]{0,0,4,0,2,1 },
+                    new int[]{0,0,1,2,2,2 },
+                    new int[]{0,0,0,1,1,1 },
+                    new int[]{0,1,0,2,0,3 },
+                    new int[]{0,1,0,1,3,2 },
+                    new int[]{0,0,0,1,3,1 },
+                    new int[]{0,0,0,1,2,0 },
+                    new int[]{0,3,1,1,1,0 }, //Master 37
+                    new int[]{0,2,0,1,1,0 },
+                    new int[]{0,0,4,1,0,2 },
+                    new int[]{0,2,1,2,0,0 },
+                    new int[]{0,2,0,1,3,1 },
+                    new int[]{0,0,0,2,2,2 },
+                    new int[]{0,2,0,2,1,0 },
+                    new int[]{0,0,2,1,2,2 },
+                    new int[]{0,0,1,0,2,2 },
+                    new int[]{0,0,4,0,1,2 },
+                    new int[]{0,1,1,0,2,3 },
+                    new int[]{0,0,0,1,1,2 },
+                }
+                ),
+            new Game(
+                "Hide and Seek Pirates Jr.",
+                new int[][]
+                {
+                    new int[]{0,1,2,3,0,4,5,0,0},
+                    new int[]{1,6,0,0,3,4,5,7,0},
+                    new int[]{1,2,7,3,4,0,7,6,8},
+                    new int[]{0,0,0,6,1,8,3,7,4},
+                },
+                new string[] {"Empty", "Barrel", "Shipwreck", "White sailboat", "Treasure chest", "Tentacles", "Tower", "Pirate Boat", "Skull island"},
+                new bool[][]
+                {
+                    new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
+                    new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
+                },
+                new int[] { 8, 12, 9 ,13 },
+                new int[][]
+                {
+                    new int[]{0,0,0,0,0,0,0,4,0}, //Starter 1
+                    new int[]{0,0,0,0,4,0,0,0,0},
+                    new int[]{0,0,0,4,0,0,0,0,0},
+                    new int[]{0,4,0,0,0,0,0,0,0},
+                    new int[]{0,0,1,3,0,0,0,0,0},
+                    new int[]{0,0,0,3,0,1,0,0,0},
+                    new int[]{0,2,2,0,0,0,1,0,0},
+                    new int[]{0,0,0,3,0,0,1,0,0},
+                    new int[]{0,0,0,2,0,0,0,3,0},
+                    new int[]{0,0,2,2,0,0,1,0,0},
+                    new int[]{0,2,1,0,0,2,0,0,0},
+                    new int[]{0,1,0,0,1,2,0,1,0},
+                    new int[]{0,0,0,0,2,0,0,0,1},
+                    new int[]{0,3,0,0,0,0,0,0,2},
+                    new int[]{0,0,1,0,0,1,1,0,1},
+                    new int[]{0,0,0,0,3,0,1,0,0},
+                    new int[]{0,0,0,0,1,0,0,1,0}, //Junior 17
+                    new int[]{0,3,0,0,0,0,0,1,0},
+                    new int[]{0,0,0,2,0,0,0,0,1},
+                    new int[]{0,2,0,1,0,0,0,0,2},
+                    new int[]{0,0,0,0,2,1,0,1,0},
+                    new int[]{0,0,2,0,1,1,0,2,0},
+                    new int[]{0,0,2,2,1,0,1,0,0},
+                    new int[]{0,0,2,1,0,1,0,3,0},
+                    new int[]{0,0,0,4,1,0,0,0,1},
+                    new int[]{0,0,0,0,3,0,1,2,0},
+                    new int[]{0,0,0,0,0,1,1,2,0},
+                    new int[]{0,0,2,0,2,1,0,1,0},
+                    new int[]{0,0,0,3,1,0,0,3,0},
+                    new int[]{0,3,0,0,1,0,0,3,0},
+                    new int[]{0,1,1,0,0,1,0,3,0},
+                    new int[]{0,0,0,0,0,0,0,0,0}, //Expert 33
+                    new int[]{0,1,0,0,0,0,0,2,1},
+                    new int[]{0,0,1,3,0,1,0,1,0},
+                    new int[]{0,0,0,0,1,1,1,1,0},
+                    new int[]{0,1,0,0,0,0,2,3,0},
+                    new int[]{0,1,1,1,1,1,0,0,2},
+                    new int[]{0,0,2,0,1,1,0,0,0},
+                    new int[]{0,0,2,0,2,1,2,0,0},
+                    new int[]{0,2,0,0,0,0,0,3,1},
+                    new int[]{0,2,0,0,2,0,0,0,0},
+                    new int[]{0,0,0,2,0,0,0,2,1},
+                    new int[]{0,0,1,0,0,1,1,1,1},
+                    new int[]{0,0,1,0,3,1,2,0,0},
+                    new int[]{0,0,0,0,1,1,1,2,0},
+                    new int[]{0,0,0,2,0,1,2,0,0},
+                    new int[]{0,1,1,0,0,0,2,0,0},
+                    new int[]{0,2,1,1,0,0,2,0,0},
+                    new int[]{0,0,0,2,0,0,0,2,0}, //Master 49
+                    new int[]{0,0,0,2,1,0,1,0,0},
+                    new int[]{0,2,1,0,0,1,0,1,0},
+                    new int[]{0,1,0,0,1,0,1,0,2},
+                    new int[]{0,0,0,2,0,0,1,0,1},
+                    new int[]{0,1,0,1,0,1,1,1,0},
+                    new int[]{0,2,0,0,0,1,2,2,0},
+                    new int[]{0,1,0,0,1,1,0,0,1},
+                    new int[]{0,0,0,0,2,0,2,2,0},
+                    new int[]{0,1,1,0,1,1,0,0,1},
+                    new int[]{0,1,0,0,0,1,1,2,0},
+                    new int[]{0,0,0,1,2,0,1,0,0},
+                }
+                ),
+            new Game(
+                "Hide and Seek Monsters",
+                new int[][]
+                {
+                    new int[]{0,1,2,3,0,4,5,0,0},
+                    new int[]{1,6,0,0,3,4,5,7,0},
+                    new int[]{1,2,7,3,4,0,7,6,8},
+                    new int[]{0,0,0,6,1,8,3,7,4},
+                },
+                new string[] { "Empty", "Mushroom monster", "Green Dinosaur monster", "Blue yeti monster", "Bat montster", "Yellow fur monster", "Tentacle mosnter", "Red devil", "Green horned monster"},
+                new bool[][]
+                {
+                    new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
+                    new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
+                },
+                new int[] { 8, 12, 9 ,13 },
+                new int[][]
+                {
+                    new int[]{0,0,0,0,0,0,0,4,0},//Starter 1
+                    new int[]{0,0,0,0,4,0,0,0,0},
+                    new int[]{0,0,0,4,0,0,0,0,0},
+                    new int[]{0,4,0,0,0,0,0,0,0},
+                    new int[]{0,0,1,3,0,0,0,0,0},
+                    new int[]{0,0,0,3,0,1,0,0,0},
+                    new int[]{0,2,2,0,0,0,1,0,0},
+                    new int[]{0,0,0,3,0,0,1,0,0},
+                    new int[]{0,0,0,2,0,0,0,3,0},
+                    new int[]{0,0,2,2,0,0,1,0,0},
+                    new int[]{0,2,0,1,0,2,0,0,0},
+                    new int[]{0,1,0,0,1,2,0,1,0},
+                    new int[]{0,0,0,0,2,0,0,0,1},
+                    new int[]{0,3,0,0,0,0,0,0,2},
+                    new int[]{0,0,1,0,0,1,1,0,1},
+                    new int[]{0,0,0,0,3,0,1,0,0},
+                    new int[]{0,0,0,0,1,0,0,1,0},//Junior 17
+                    new int[]{0,3,0,0,0,0,0,1,0},
+                    new int[]{0,0,0,2,0,0,0,0,1},
+                    new int[]{0,2,0,1,0,0,0,0,2},
+                    new int[]{0,0,0,0,2,1,0,1,0},
+                    new int[]{0,0,0,0,2,0,0,3,0},
+                    new int[]{0,0,2,0,1,1,0,2,0},
+                    new int[]{0,0,2,2,1,0,1,0,0},
+                    new int[]{0,0,2,1,0,1,0,3,0},
+                    new int[]{0,0,0,4,1,0,0,0,1},
+                    new int[]{0,0,0,0,3,0,1,2,0},
+                    new int[]{0,0,0,0,0,1,1,2,0},
+                    new int[]{0,0,2,0,2,1,0,1,0},
+                    new int[]{0,0,0,3,1,0,0,3,0},
+                    new int[]{0,3,0,0,1,0,0,3,0},
+                    new int[]{0,1,0,1,0,1,0,3,0},
+                    new int[]{0,1,0,0,0,0,0,2,1}, //Expert 33
+                    new int[]{0,0,1,3,0,1,0,1,0},
+                    new int[]{0,0,0,0,1,1,1,1,0},
+                    new int[]{0,1,0,0,0,0,2,3,0},
+                    new int[]{0,1,1,1,1,1,0,0,2},
+                    new int[]{0,0,0,2,1,1,0,0,0},
+                    new int[]{0,0,0,2,2,1,2,0,0},
+                    new int[]{0,2,0,0,0,0,0,3,1},
+                    new int[]{0,2,0,0,2,0,0,0,0},
+                    new int[]{0,0,0,0,2,0,0,2,1},
+                    new int[]{0,0,1,0,0,1,1,1,1},
+                    new int[]{0,0,1,0,3,1,0,2,0},
+                    new int[]{0,0,0,0,1,1,1,2,0},
+                    new int[]{0,0,0,2,1,0,2,0,0},
+                    new int[]{0,1,1,0,0,0,2,0,0},
+                    new int[]{0,2,1,1,0,0,2,0,0},
+                    new int[]{0,0,0,2,0,0,0,2,0},//Master 49
+                    new int[]{0,0,0,2,1,0,1,0,0},
+                    new int[]{0,2,1,0,0,1,0,1,0},
+                    new int[]{0,1,0,0,1,0,1,0,2},
+                    new int[]{0,0,0,2,0,0,1,0,1},
+                    new int[]{0,1,0,1,0,1,1,1,0},
+                    new int[]{0,2,0,0,0,1,2,2,0},
+                    new int[]{0,1,0,0,1,1,0,0,1},
+                    new int[]{0,0,0,0,2,0,2,2,0},
+                    new int[]{0,1,1,0,1,1,0,0,1},
+                    new int[]{0,1,0,0,0,1,1,2,0},
+                    new int[]{0,0,0,1,2,0,1,0,0},
+                }
+                ),
+            new Game(
+                "Hide and Seek Canada CacheCache",
+                new int[][]
+                {
+                new int[]{1,0,1,0,0,0,2,0,3},
+                new int[]{0,0,3,0,4,0,5,0,2},
+                new int[]{4,0,2,0,5,0,0,0,2},
+                new int[]{1,0,4,0,2,0,0,0,5},
+                },
+                new string[] { "Empty", "Goose", "Beaver", "Bear", "Raccoon", "Moose" },
+                new bool[][]
+                {
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                    new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
+                    new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
+                },
+                new int[] { 8, 12 },
+                new int[][] {}
+                ),
+            new Game(
+                "Hide and Seek Rasmus Klump",
+                new int[][]
+                {
+                    new int[]{1,0,2,0,3,0,4,0,0},
+                    new int[]{0,0,5,0,0,0,1,0,3},
+                    new int[]{6,0,7,0,1,0,8,0,0},
+                    new int[]{9,0,0,0,3,0,10,0,11},
+                },
+                new string[] { "Empty", "Treasure", "Blæksprut", "Rasmus Klump", "Pelle", "Leo", "Pingo", "Skæg", "Knalle", "Basse", "Turtle", "Grete"},
+                new bool[][]
+                {
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                    new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
+                    new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
+                },
+                new int[] { 8, 12 },
+                new int[][] {}
+                ),
+            new Game(
+                "Dora is searching for her friends",
+                new int[][]
+                {
+                    new int[]{1,0,2,0,3,0,4,0,0},
+                    new int[]{0,0,5,0,0,0,1,0,3},
+                    new int[]{6,0,7,0,1,0,8,0,0},
+                    new int[]{9,0,0,0,3,0,10,0,11},
+                },
+                new string[] { "Empty", "Explorer star", "Señor Tucán", "Dora the explorer", "Grumpy old Troll", "Butterflies", "Tico", "Isa", "Benny", "Boots", "Backpack", "Swiper" },
+                new bool[][]
+                {
+                    new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
+                    new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
+                    new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
+                    new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
+                },
+                new int[] { 8, 12 },
+                new int[][] {}
+                )
         };
         
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.Unicode;
-            int[][] squares; //Game boards.
-            bool[][] tiles;
-            string[] objectNames;
-            int[] repeatIndex; //When there is a repeat with rotations on pieces.
-            int maxEmptyCount = 0; //Amount of holes in the pieces.
+
             while (true)
             {
                 Console.WriteLine("Choose game: ");
                 Console.WriteLine("0. Exit");
-                Console.WriteLine("1. Hide & Seek Safari");
-                Console.WriteLine("2. Hide & Seek Pirates");
-                Console.WriteLine("3. Hide & Seek Monsters");
-                Console.WriteLine("4. Dora is searching for her friends");
-                Console.WriteLine("5. Hide & Seek Canada Cache-Cahce");
-                Console.WriteLine("6. Hide & Seek Safari Booster");
+                for(int i = 0; i < games.Length; i++)
+                {
+                    Console.WriteLine((i + 1) + ". " + games[i].name);
+                }
                 bool validChoice = int.TryParse(Console.ReadLine(), out int gameChoice);
+                gameChoice--;
                 if(!validChoice)
                 {
                     continue;
                 }
 
-                switch (gameChoice)
+                int challengeChoice = 0;
+                if (games[gameChoice].presetChallenges.Length > 0) //Check if there is preset challenges
                 {
-                    case 0:
-                        return;
-                    case 1: //Hide and Seek Safari
-                        squares = new int[][] //Matches with object names array.
-                        {
-                            new int[]{1,0,2,3,4,3,5,2,1},
-                            new int[]{4,0,2,0,3,1,2,5,4},
-                            new int[]{5,1,3,4,0,4,2,0,5},
-                            new int[]{0,0,0,0,5,2,4,1,3},
-                        };
-                        tiles = new bool[][] //Don't change the order, H-piece must be firts
-                        {
-                            new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
-                            new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
-                            new bool[]{true,true,false,false,true,true,false,true,true},//b-piece
-                            new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
-                        };
-                        maxEmptyCount = 9;
-                        objectNames = new string[] {"Empty", "Elephant", "Lion", "Zebra", "Gazelle", "Rhino" };
-                        repeatIndex = new int[] { 8, 12 };
-                        break;
-                    case 2: //Hide and Seek Pirates
-                        squares = new int[][] //Matches with object names array.
-                        {
-                            new int[]{1,0,1,0,0,0,2,0,3},
-                            new int[]{0,0,3,0,4,0,5,0,2},
-                            new int[]{4,0,2,0,5,0,0,0,2},
-                            new int[]{1,0,4,0,2,0,0,0,5},
-                        };
-                        tiles = new bool[][] //Don't change the order!
-                        {
-                            new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
-                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
-                            new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
-                            new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
-                        };
-                        maxEmptyCount = 7;
-                        repeatIndex = new int[] { 8, 12 };
-                        objectNames = new string[] {"Empty", "Rowing boat", "White sailboat", "Cave island", "Red sailboat", "Pirate island" };
-                        break;
-                    case 3: //Hide & Seek monsters
-                        squares = new int[][] //Matches with object names array.
-                        {
-                            new int[]{0,1,2,3,0,4,5,0,0},
-                            new int[]{1,6,0,0,3,4,5,7,0},
-                            new int[]{1,2,7,3,4,0,7,6,8},
-                            new int[]{0,0,0,6,1,8,3,7,4},
-                        };
-                        tiles = new bool[][] //Don't change the order, H-piece must be firts
-                        {
-                            new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
-                            new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
-                            new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
-                            new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
-                        };
-                        maxEmptyCount = 8;
-                        repeatIndex = new int[] { 8, 12, 9 ,13 };
-                        objectNames = new string[] { "Empty", "Mushroom monster", "Green Dinosaur monster", "Blue yeti monster", "Bat montster", "Yellow fur monster", "Tentacle mosnter", "Red devil", "Green horned monster"};
-                        break;
-                    case 4: //
-                        squares = new int[][] //Matches with object names array.
-                        {
-                            new int[]{1,0,2,0,3,0,4,0,0},
-                            new int[]{0,0,5,0,0,0,1,0,3},
-                            new int[]{6,0,7,0,1,0,8,0,0},
-                            new int[]{9,0,0,0,3,0,10,0,11},
-                        };
-                        tiles = new bool[][] //Don't change the order!
-                        {
-                            new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
-                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
-                            new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
-                            new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
-                        };
-                        maxEmptyCount = 7;
-                        repeatIndex = new int[] { 8, 12 };
-                        objectNames = new string[] { "Empty", "Explorer star", "Señor Tucán", "Dora the explorer", "Grumpy old Troll", "Butterflies", "Tico", "Isa", "Benny", "Boots", "Backpack", "Swiper" };
-                        break;
-                    case 5: //Hide & Seek Canada Cache-Cache
-                        squares = new int[][] //Matches with object names array.
-                            {
-                            new int[]{1,0,1,0,0,0,2,0,3},
-                            new int[]{0,0,3,0,4,0,5,0,2},
-                            new int[]{4,0,2,0,5,0,0,0,2},
-                            new int[]{1,0,4,0,2,0,0,0,5},
-                            };
-                        tiles = new bool[][] //Don't change the order!
-                        {
-                            new bool[]{true,true,false,true,true,true,false, true, true}, //Top right & bottom left empty piece
-                            new bool[]{true,true,true,true,true,true,false,true,false}, //Sign-piece
-                            new bool[]{true,true,false,true,false,true,true,true,true}, //L-piece
-                            new bool[]{true,true,false, true, true,true, true, true,true}, //Top right empty piece
-                        };
-                        maxEmptyCount = 7;
-                        repeatIndex = new int[] { 8, 12 };
-                        objectNames = new string[] { "Empty", "Goose", "Beaver", "Bear", "Raccoon", "Moose" };
-                        break;
-                    case 6: //Hide and Seek Safari
-                        squares = new int[][] //Matches with object names array.
-                        {
-                            new int[]{1,0,2,3,4,3,5,2,1},
-                            new int[]{4,0,2,0,3,1,2,5,4},
-                            new int[]{5,1,3,4,0,4,2,0,5},
-                            new int[]{0,0,0,0,5,2,4,1,3},
-                        };
-                        tiles = new bool[][] //Don't change the order, H-piece must be firts
-                        {
-                            new bool[]{true,false,true,true,true,true,true,false,true}, //H-piece
-                            new bool[]{true,false,true,true,false,true,true,true,true}, //U-piece
-                            new bool[]{true,true,false,false,true,true,false,true,true},//b-piece
-                            new bool[]{true,true,false,true,true,true,true,false,true}, //R-piece
-                            new bool[]{false,true,true,true,true,true,true,false,true}, //Mirrored R-piece
-                        };
-                        maxEmptyCount = 9;
-                        objectNames = new string[] { "Empty", "Elephant", "Lion", "Zebra", "Gazelle", "Rhino" };
-                        repeatIndex = new int[] { 10, 15 };
-                        break;
-                    default:
-                        continue;
-                }
-
-                int problemChoice = 0;
-                if (presetChallenges[gameChoice - 1].Length > 0) //Check if there is preset challenges
-                {
-                    Console.WriteLine("Choose the puzzle from 1-" + presetChallenges[gameChoice - 1].Length + " or zero to input your own choice");
-                    validChoice = int.TryParse(Console.ReadLine(), out problemChoice);
+                    Console.WriteLine("Choose the puzzle from 1-" + games[gameChoice].presetChallenges.Length + " or zero to input your own choice");
+                    validChoice = int.TryParse(Console.ReadLine(), out challengeChoice);
                     if (!validChoice)
                     {
                         continue;
                     }
                 }
-                
 
-                int[] desiredResult = new int[objectNames.Length]; //Zero index is max empty count
-                if (problemChoice == 0) //User inputs the amount of things to find.
+                int[] desiredResult = new int[games[gameChoice].objectNames.Length]; //Zero index is max empty count
+                if (challengeChoice == 0) //User inputs the amount of things to find.
                 {
                     Console.WriteLine("Input the amount of objects:");
-                    desiredResult[0] = maxEmptyCount;
-                    for (int i = 1; i < objectNames.Length; i++)
+                    desiredResult[0] = games[gameChoice].maxEmptyCount;
+                    for (int i = 1; i < games[gameChoice].objectNames.Length; i++)
                     {
-                        Console.Write(objectNames[i] + ": ");
+                        Console.Write(games[gameChoice].objectNames[i] + ": ");
                         desiredResult[i] = int.Parse(Console.ReadLine());
                         desiredResult[0] -= desiredResult[i];
                     }
                     if (desiredResult[0] < 0)
                     {
-                        Console.WriteLine("Too many objects. Limit is " + maxEmptyCount);
+                        Console.WriteLine("Too many objects. Limit is " + games[gameChoice].maxEmptyCount);
                         continue;
                     }
                 }
-                else if (problemChoice > 0) //Preset values
+                else if (challengeChoice > 0) //Preset values
                 {
-                    desiredResult = presetChallenges[gameChoice - 1][problemChoice - 1];
-                    desiredResult[0] = maxEmptyCount;
+                    desiredResult = games[gameChoice].presetChallenges[challengeChoice - 1];
+                    desiredResult[0] = games[gameChoice].maxEmptyCount;
                     for(int i = 1; i < desiredResult.Length; i++)
                     {
                         desiredResult[0] -= desiredResult[i];
@@ -439,17 +557,17 @@ namespace Hide_N_Seek
                 int[] solution = new int[4]; //Brute forcing all solutions.
                 while (true)
                 {
-                    if (checkResult(solution, squares, tiles, desiredResult))
+                    if (checkResult(solution, games[gameChoice].squares, games[gameChoice].tiles, desiredResult))
                     {
-                        showSolution(solution, tiles);
+                        showSolution(solution, games[gameChoice].tiles);
                         break;
                     }
-                    if (solution[0] == tiles.Length * 4 - 1 && solution[1] == tiles.Length * 4 - 1 && solution[2] == tiles.Length * 4 - 1 && solution[3] == tiles.Length * 4 - 1)
+                    if (solution[0] == games[gameChoice].tiles.Length * 4 - 1 && solution[1] == games[gameChoice].tiles.Length * 4 - 1 && solution[2] == games[gameChoice].tiles.Length * 4 - 1 && solution[3] == games[gameChoice].tiles.Length * 4 - 1)
                     {
                         Console.WriteLine("No solution! Check your input.");
                         break;
                     }
-                    increase(solution, 3, repeatIndex);
+                    increase(solution, 3, games[gameChoice].skipIndexes);
                 }
                 Console.ReadLine();
             }

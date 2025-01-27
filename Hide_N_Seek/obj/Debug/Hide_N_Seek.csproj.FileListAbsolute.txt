@@ -12,3 +12,10 @@ C:\Users\aarnjunk\Documents\2_Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\
 C:\Users\aarnjunk\Documents\2_Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.csproj.CoreCompileInputs.cache
 C:\Users\aarnjunk\Documents\2_Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.exe
 C:\Users\aarnjunk\Documents\2_Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.pdb
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.exe.config
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.exe
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\bin\Debug\Hide_N_Seek.pdb
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.csproj.AssemblyReference.cache
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.csproj.CoreCompileInputs.cache
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.exe
+D:\Documents\Ohjelmointi\Smart-Games-Hide-and-Seek\Hide_N_Seek\obj\Debug\Hide_N_Seek.pdb
