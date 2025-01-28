@@ -567,25 +567,25 @@ namespace Hide_N_Seek
                         Console.WriteLine("No solution! Check your input.");
                         break;
                     }
-                    increase(solution, 3, games[gameChoice].skipIndexes);
+                    increase(solution, 3, games[gameChoice].skipIndexes, games[gameChoice].tiles.Length * 4);
                 }
                 Console.ReadLine();
             }
         }
 
-        static public int[] increase(int[] data, int index, int[] repeatIndex)
+        static public int[] increase(int[] data, int index, int[] repeatIndex, int upperLimit)
         {
-            data[index] = (data[index] + 1) % 16;
+            data[index] = (data[index] + 1) % upperLimit;
             for(int i = 0; i < repeatIndex.Length; i++)
             {
                 if (repeatIndex.Contains(data[index]))
                 {
-                    return increase(data, index, repeatIndex);
+                    return increase(data, index, repeatIndex,upperLimit);
                 }
             }
             if (data[index] == 0 && index > 0)
             {
-                return increase(data, index -1, repeatIndex);
+                return increase(data, index -1, repeatIndex,upperLimit);
             }
             return data;
         }
